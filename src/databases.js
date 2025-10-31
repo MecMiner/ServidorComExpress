@@ -1,4 +1,3 @@
-import { error } from 'node:console'
 import fs from 'node:fs/promises'
 
 const databasePath = new URL('../db.json', import.meta.url)
@@ -29,46 +28,36 @@ export class Database {
         const data = this.#database[table] ?? []
         let item = {}
         if(Array.isArray(data)){
-            item = data.find(item => item.id == id)
+            item = data.find(item => item.id == id) ?? {}
         }
-       return item 
+        return item
     }
 
     delete(table, id){
-        try {
-            const data = this.#database[table] ?? []
-            const newData = data.filter(item => item.id != id)
-            console.log("Dados carregados")
-            this.#database[table] = [newData]
-            this.#persist()
-            return ({
-                error: false,
-                mensagem: "Sucesso ao deletar"
-            })
-        } catch (error) {
-            return ({
-                error: error,
-                mensagem: "Erro ao deletar"
-            })
+        const data = this.#database[table] ?? []
+        const newData = data.filter(item => item.id != id)
+        this.#database[table] = newData
+        this.#persist()
+        return {
+            error: false,
+            mensagem: "Usuário excluído"
         }
-
     }
 
     update(table, id, novo){
         const data = this.#database[table] ?? []
         const indice = data.findIndex(item => item.id == id)
-        if (indice != -1){
-            data.splice(indice, 1, novo)
-            this.#persist()
+        console.log(indice)
+        if (indice == -1){
             return {
-                error: false,
-                mensagem: "Alterado com sucesso"
+                error: true,
+                mensagem: "Item não encontrado"
             }
         }
-
+        data.splice(indice, 1, novo)
         return {
-                error: true,
-                mensagem: "Id não encontrado"
+            error: false,
+            mensagem: "Item atualizado"
         }
     }
 
